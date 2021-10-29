@@ -1,0 +1,51 @@
+@import url('https://fonts.googleapis.com/css?family=Montserrat:400,600&display=swap');
+
+body {
+	font-family: 'Montserrat', sans-serif;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	color: #000D35;
+    margin: 0;
+    padding: 0;
+}
+
+
+button {
+    font-style: normal;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border: 1px solid transparent;
+    border-radius: 1.375em;
+    height: 2.7em;
+    font-size: 0.875em;
+    line-height: 1.0625em;
+}
+
+button.primary {
+    background-color: #9D4DFA;
+    color: #FFFFFF;
+
+    &:hover, &:active {
+        background-color: darken(#9D4DFA, 5%);
+    }
+
+    &:disabled {
+        background-color: lighten(#9D4DFA, 5%);
+    }
+}
+
+
+.infinity-rotate {
+    -webkit-animation:spin 0.5s linear infinite;
+    -moz-animation:spin 0.5s linear infinite;
+    animation:spin 0.5s linear infinite;
+    animation-fill-mode: forwards;
+  }
+  @-moz-keyframes spin { 0% { -moz-transform: rotate(0deg); } 100% { -moz-transform: rotate(360deg); } }
+  @-webkit-keyframes spin { 0% { -moz-transform: rotate(0deg); } 100% { -webkit-transform: rotate(360deg); } }
+  @keyframes spin { 0% { -moz-transform: rotate(0deg); } 100% { transform:rotate(360deg); } }
+  
+  
