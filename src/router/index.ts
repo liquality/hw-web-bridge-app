@@ -1,19 +1,16 @@
-import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
+import { version } from '../../package.json'
+import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
+import Ledger from '../views/Ledger.vue'
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
-    name: 'Home',
-    redirect: '/ledger'
-  },
-  {
-    path: '/ledger/:extensionId?',
     name: 'Ledger',
-    component: () => import(/* webpackChunkName: "ledger" */ '../views/Ledger.vue')
+    component: Ledger
   }
 ]
 
 const router = createRouter({
-  history: createWebHashHistory(),
+  history: createWebHistory(process.env.NODE_ENV === 'production' ? `/hw-web-bridge-app/dist/${version}` : '/'),
   routes
 })
 
