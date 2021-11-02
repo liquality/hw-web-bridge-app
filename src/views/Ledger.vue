@@ -87,8 +87,9 @@ export default defineComponent({
   methods: {
     createMessenger () {
       try {
-        console.log('id', this.$route.query.extensionId)
-        const messenger = chrome.runtime.connect(this.$route.query.extensionId, { name: 'ledger-bridge' })
+        const { extensionId } = this.$route.query
+        console.log('extensionId', extensionId)
+        const messenger = chrome.runtime.connect(extensionId, { name: 'ledger-bridge' })
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         messenger.onDisconnect.addListener((port: any) => {
           this.status = statuses.error.name
