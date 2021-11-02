@@ -4,13 +4,13 @@
       <HeadLogo />
     </header>
     <main>
-      <h1>{{ status.title }}</h1>
+      <h1>{{ statuses[status].title }}</h1>
       <div class="activiy-indicator">
         <LoadingIcon
           class="infinity-rotate"
-          v-if="status.name === 'connecting'"
+          v-if="statuses[status].name === 'connecting'"
         />
-        <LoadedIcon v-if="status.name === 'connected'" />
+        <LoadedIcon v-if="statuses[status].name === 'connected'" />
       </div>
       <div class="content">
         <LiqualityLogo />
@@ -18,22 +18,28 @@
       </div>
     </main>
     <footer>
-      <button class="primary full">
-        {{ status.actionText }}
+      <button class="primary full" @click="createMessenger">
+        {{ statuses[status].actionText }}
       </button>
     </footer>
   </div>
 </template>
 
 <script lang="ts">
+
 import { defineComponent, ref } from 'vue'
 import HeadLogo from '@/assets/img/head_logo.svg?inline'
 import LiqualityLogo from '@/assets/img/logo.svg?inline'
 import LoadingIcon from '@/assets/img/loading_icon.svg?inline'
 import LoadedIcon from '@/assets/img/loaded_icon.svg?inline'
 import LedgerUsb from '@/assets/img/ledger_usb.svg?inline'
-// import * as browser from 'webextension-polyfill'
-// import { BridgeManager } from '@liquality/hw-web-bridge'
+// import {
+//   LedgerBridgeMessageHandler
+// } from '@liquality/hw-web-bridge'
+// import WebUSBTransport from '@ledgerhq/hw-transport-webusb'
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+declare var chrome: any
 
 export default defineComponent({
   name: 'Ledger',
@@ -45,7 +51,7 @@ export default defineComponent({
     LedgerUsb
   },
   setup () {
-    const statusList = {
+    const statuses = {
       started: {
         name: 'started',
         title: 'Connect Ledger',
@@ -68,15 +74,43 @@ export default defineComponent({
       }
     }
 
-    // const portCreator = () => {
-    //   const port = browser.runtime.connect('', { name: 'LEDGER-WEB-BRIDGE' })
-    //   port.onDisconnect.addListener(() => {
-    //     //
-    //   })
-    // }
-    const status = ref(statusList.started)
+    const createMessenger = () => {
+      try {
+        const id = window.location.hash.substring(1)
+        console.log('id', id)
+        const messenger = chrome.runtime.connect(id, { name: 'ledger-bridge' })
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        messenger.onDisconnect.addListener((port: any) => {
+          status.value = statuses.error.name
+          statusDetail.value = 'Disconnected from the Extension'
+          console.error('onDisconnect', chrome.runtime.lastError?.message, port.name)
+        })
+      } catch (error) {
+        console.error('error', error)
+      }
+    }
+
+    const onConnect = async () => {
+      // try {
+      //   const transport = await WebUSBTransport.create()
+      //   const messenger = createMessenger()
+      //   const bridge = new LedgerBridgeMessageHandler(transport, messenger)
+      //   messenger.onMessage.addListener(bridge.onMessage)
+      // } catch (error) {
+      //   status.value = statuses.error.name
+      //   statusDetail.value = 'Cannot connect to the wallet'
+      //   console.error(error)
+      // }
+    }
+
+    const status = ref<string>(statuses.started.name)
+    const statusDetail = ref<string>('')
     return {
-      status
+      statuses,
+      status,
+      statusDetail,
+      onConnect,
+      createMessenger
     }
   }
 })

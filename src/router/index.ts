@@ -8,7 +8,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/ledger',
     name: 'Ledger',
-    component: () => import(/* webpackChunkName: "about" */ '../views/Ledger.vue')
+    component: () => import(/* webpackChunkName: "ledger" */ '../views/Ledger.vue')
   }
 ]
 

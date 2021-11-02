@@ -5,7 +5,6 @@ declare module '*.vue' {
   export default component
 }
 
-
 declare module '*.svg?inline' {
   const content: any
   export default content
