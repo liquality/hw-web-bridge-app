@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@ledgerhq/hw-transport-webusb": "^6.11.2",
+    "@liquality/hw-web-bridge": "^0.0.1",
     "core-js": "^3.6.5",
     "vue": "^3.2.1",
     "vue-router": "^4.0.0-0"
