@@ -6,8 +6,8 @@
     <main>
       <h1>{{ statuses[status].title }}</h1>
       <div class="activiy-indicator">
-        <LoadingIcon class="infinity-rotate" v-if="status === 'connecting'" />
-        <LoadedIcon v-if="status === 'connected'" />
+        <LoadingIcon class="infinity-rotate" v-if="status === bridgeStatus.Connecting" />
+        <LoadedIcon v-if="status === bridgeStatus.Connected" />
       </div>
       <div class="content">
         <LiqualityLogo />
@@ -27,6 +27,7 @@
 </template>
 
 <script lang="ts">
+/* global chrome */
 import { defineComponent } from 'vue'
 import HeadLogo from '@/assets/img/head_logo.svg?inline'
 import LiqualityLogo from '@/assets/img/logo.svg?inline'
@@ -34,39 +35,43 @@ import LoadingIcon from '@/assets/img/loading_icon.svg?inline'
 import LoadedIcon from '@/assets/img/loaded_icon.svg?inline'
 import LedgerUsb from '@/assets/img/ledger_usb.svg?inline'
 import {
-  BridgeManager
+  createBridgePort,
+  createLedgerTransport,
+  MessageHandler
 } from '@liquality/hw-web-bridge'
-import TransportWebUSB from '@ledgerhq/hw-transport-webusb'
 
-let bridgeManager: BridgeManager
+let bridgePort: chrome.runtime.Port | null = null
+let messageHandler: MessageHandler
 
+enum BridgeStatus {
+  Started = 'started',
+  Connecting = 'connecting',
+  Connected = 'connected',
+  BridgeError = 'bridgeError',
+  TransportError = 'transportError'
+}
 const statuses = {
-  started: {
-    name: 'started',
+  [BridgeStatus.Started]: {
     title: 'Connect Ledger',
     disableAction: false,
     actionText: 'Connect'
   },
-  connecting: {
-    name: 'connecting',
+  [BridgeStatus.Connecting]: {
     title: 'Ledger Connecting',
     disableAction: true,
     actionText: 'Connecting...'
   },
-  connected: {
-    name: 'connected',
+  [BridgeStatus.Connected]: {
     title: 'Ledger Connected',
     disableAction: true,
     actionText: 'Connected!'
   },
-  bridgeError: {
-    name: 'bridgeError',
-    title: "Can't connect to the Wallet",
+  [BridgeStatus.BridgeError]: {
+    title: 'Not connected with the Wallet',
     disableAction: false,
     actionText: 'Try to reconnect'
   },
-  transportError: {
-    name: 'transportError',
+  [BridgeStatus.TransportError]: {
     title: 'Connect Ledger',
     disableAction: false,
     actionText: 'Reconnect'
@@ -85,56 +90,56 @@ export default defineComponent({
   data: function () {
     return {
       status: 'started',
-      statusDetail: ''
+      portConnected: false,
+      addPortListener: true,
+      transportCreated: false
     }
   },
   computed: {
     statuses () {
       return statuses
+    },
+    bridgeStatus () {
+      return BridgeStatus
     }
   },
   created () {
+    messageHandler = new MessageHandler()
     this.createPort()
   },
   methods: {
     createPort () {
       const { extensionId } = this.$route.query as { extensionId: string }
-      bridgeManager = new BridgeManager(extensionId)
-      bridgeManager.createPort(() => {
-        this.status = statuses.bridgeError.name
-        this.statusDetail = 'Disconnected from the Extension'
+      bridgePort = createBridgePort(extensionId, () => {
+        bridgePort = null
+        this.status = BridgeStatus.BridgeError
       })
+      messageHandler.setPort(bridgePort)
     },
     async createTransport () {
-      this.status = statuses.connecting.name
-      this.statusDetail = ''
-      let transport = null
-      try {
-        transport = await TransportWebUSB.create()
-      } catch (error) {
-        this.status = statuses.transportError.name
-        this.statusDetail = 'Error connecting to usb device'
-      }
-
-      if (transport) {
+      this.status = BridgeStatus.Connecting
+      if (bridgePort) {
         try {
-          bridgeManager.tryCreateBridge(transport, () => {
-            this.status = statuses.transportError.name
-            this.statusDetail = 'Error connecting to usb device'
+          const ledgerTransport = await createLedgerTransport(bridgePort, () => {
+            this.status = BridgeStatus.TransportError
+            ledgerTransport.close()
           })
-          this.status = statuses.connected.name
-          this.statusDetail = ''
+          messageHandler.setTransport(ledgerTransport)
+          messageHandler.startListener()
+          this.status = BridgeStatus.Connected
         } catch (error) {
-          this.status = statuses.bridgeError.name
-          this.statusDetail = 'Disconnected from the Extension'
+          console.error('On create transport', error)
+          this.status = BridgeStatus.TransportError
         }
+      } else {
+        this.status = BridgeStatus.BridgeError
       }
     },
-    async tryConnect () {
-      if (!bridgeManager || !bridgeManager.connected) {
+    tryConnect () {
+      if (!bridgePort) {
         this.createPort()
       }
-      await this.createTransport()
+      this.createTransport()
     }
   }
 })
