@@ -7,10 +7,14 @@
     "build": "vue-cli-service build",
     "test:unit": "vue-cli-service test:unit",
     "test:e2e": "vue-cli-service test:e2e",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint --fix"
   },
   "dependencies": {
-    "@liquality/hw-web-bridge": "0.1.0",
+    "@ledgerhq/hw-app-btc": "6.7.0",
+    "@ledgerhq/hw-app-eth": "6.23.1",
+    "@ledgerhq/hw-transport": "6.20.0",
+    "@ledgerhq/hw-transport-webhid": "6.20.0",
+    "@liquality/cryptoassets": "^1.7.3",
     "core-js": "^3.6.5",
     "vue": "^3.2.1",
     "vue-router": "^4.0.0-0"
