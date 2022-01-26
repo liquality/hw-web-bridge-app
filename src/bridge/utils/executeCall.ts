@@ -12,8 +12,6 @@ export const executeCall = async (
   let result = null
   const parsedInput = fromHexToBufferPayload(payload)
   console.log('::::::::executeCall:::::::::')
-  console.log('payload', payload)
-  console.log('parsedInput', parsedInput)
   const _executor = executor as any
 
   switch (mode) {
@@ -30,6 +28,5 @@ export const executeCall = async (
       break
   }
 
-  console.log('result', result)
   return fromBufferToHexPayload(result)
 }
