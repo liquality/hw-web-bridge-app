@@ -6,7 +6,6 @@ import {
   ClientRequest, LOG_PREFIX, RequestNamespace
 } from './types'
 import { createLedgerApp, executeCall, fromHexToBufferPayload, getReplySignature } from './utils'
-import BTCApp from '@ledgerhq/hw-app-btc'
 
 export class MessageHandler {
   private _port?: chrome.runtime.Port;

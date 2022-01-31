@@ -38,7 +38,7 @@ import {
   createBridgePort,
   createLedgerTransport,
   MessageHandler
-} from '../bridge'
+} from '@liquality/hw-web-bridge'
 
 let bridgePort: chrome.runtime.Port | null = null
 let messageHandler: MessageHandler
